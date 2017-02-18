@@ -99,6 +99,6 @@ func main() {
 
 	fmt.Fprintln(os.Stdout, "Listen "+listen)
 
-	http.Handle("/", NewHandler(endpoint, profile, region))
+	http.Handle("/", NewHandler(endpoint, NewSigner(profile, region, "es")))
 	http.ListenAndServe(listen, nil)
 }

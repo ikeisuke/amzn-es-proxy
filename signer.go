@@ -15,6 +15,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws/signer/v4"
 )
 
+type SignerInterface interface {
+	Sign(req *http.Request) error
+}
+
 type Signer struct {
 	Region  string
 	Service string

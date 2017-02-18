@@ -2,20 +2,19 @@ package main
 
 import (
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 )
 
 type Handler struct {
 	Endpoint string
-	s        *Signer
+	s        SignerInterface
 }
 
-func NewHandler(endpint string, profile string, region string) *Handler {
+func NewHandler(endpint string, signer SignerInterface) *Handler {
 	return &Handler{
 		Endpoint: endpint,
-		s:        NewSigner(profile, region, "es"),
+		s:        signer,
 	}
 }
 
@@ -25,12 +24,14 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	url.Scheme = "https"
 	req, _ := http.NewRequest(r.Method, url.String(), r.Body)
 	req.ContentLength = r.ContentLength
+  origin := "http://" + r.Host;
+  replace := "https://" + endpoint
 	for k, vs := range r.Header {
 		if k == "Connection" {
 			continue
 		}
 		for _, v := range vs {
-			req.Header.Add(k, strings.Replace(v, "http://localhost:8080", "https://"+endpoint, -1))
+			req.Header.Add(k, strings.Replace(v, origin, replace, -1))
 		}
 	}
 	err := h.s.Sign(req)
@@ -47,7 +48,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		for k, v := range res.Header {
 			s := strings.Join(v, ", ")
-			w.Header().Set(k, strings.Replace(s, "http://localhost:8080", "https://"+endpoint, -1))
+			w.Header().Set(k, strings.Replace(s, origin, replace, -1))
 		}
 		w.WriteHeader(res.StatusCode)
 		w.Write(b)
