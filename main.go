@@ -33,12 +33,16 @@ func main() {
 		DomainName: aws.String(domain), // Required
 	}
 	resp, err := es.DescribeElasticsearchDomain(params)
-
 	if err != nil {
 		log.Println(err.Error())
 		return
 	}
+  processing := *resp.DomainStatus.Processing;
   endpoint := *resp.DomainStatus.Endpoint
+  if processing || endpoint == "" {
+		log.Println("This domain is being initialized.")
+		return
+  }
   http.HandleFunc("/", handler(endpoint))
   http.ListenAndServe("localhost:8080", nil)
 }

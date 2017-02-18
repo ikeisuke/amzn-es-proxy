@@ -1,42 +1,54 @@
 package main
 
 import (
-  //"fmt"
   "net/http"
+  "io"
   "io/ioutil"
   "os"
   "os/user"
   "strings"
+  "bytes"
+  "time"
 
   "github.com/aws/aws-sdk-go/aws/signer/v4"
   "github.com/aws/aws-sdk-go/aws/credentials"
-  "github.com/sha1sum/aws_signing_client"
 )
 
 func handler(endpoint string) func(w http.ResponseWriter, r *http.Request) {
   u, _ := user.Current()
   creds := credentials.NewSharedCredentials(u.HomeDir + "/.aws/credentials", os.Getenv("AWS_PROFILE"))
   signer := v4.NewSigner(creds)
-  client, _ := aws_signing_client.New(signer, nil, "es", os.Getenv("AWS_REGION"))
+  client := http.DefaultClient
   return func(w http.ResponseWriter, r *http.Request) {
-    defer r.Body.Close()
     url := r.URL
     url.Host = endpoint
     url.Scheme = "https"
-    esr, _ := http.NewRequest(r.Method, url.String(), r.Body)
+    req, _ := http.NewRequest(r.Method, url.String(), r.Body)
+    req.ContentLength = r.ContentLength;
     for k, vs := range r.Header {
+      if k == "Connection" {
+        continue;
+      }
       for _, v := range vs {
-        esr.Header.Add(k, v)
+        req.Header.Add(k, strings.Replace(v, "http://localhost:8080", "https://" + endpoint, -1))
       }
     }
-    for _, c := range r.Cookies() {
-      esr.AddCookie(c)
+    var body io.ReadSeeker
+    if req.Body != nil {
+      buf, _ := ioutil.ReadAll(req.Body)
+      body = bytes.NewReader(buf)
     }
-    res, _ := client.Do(esr)
+    _, err := signer.Sign(req, body, "es", os.Getenv("AWS_REGION"), time.Now())
+    res, err := client.Do(req)
+  	if err != nil {
+      http.Error(w, err.Error(), http.StatusInternalServerError)
+  		return
+  	}
     b, err := ioutil.ReadAll(res.Body)
     if err == nil {
       for k, v := range res.Header {
-        w.Header().Set(k, strings.Join(v, ", "))
+        s := strings.Join(v, ", ")
+        w.Header().Set(k, strings.Replace(s, "http://localhost:8080", "https://" + endpoint, -1))
       }
       w.WriteHeader(res.StatusCode)
       w.Write(b)

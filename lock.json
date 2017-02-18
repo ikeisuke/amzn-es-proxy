@@ -1,16 +1,15 @@
 {
-    "memo": "148ca300e29cee7fcef8a58b52a20321b409f258c12c1e8755ae20d3cacf4e4b",
+    "memo": "c3cd118b8db6b39bbb7fef54bb9361660f89c7d4f7731e1e3f87ffb026c924f3",
     "projects": [
         {
             "name": "github.com/aws/aws-sdk-go",
-            "version": "v1.6.22",
-            "revision": "744809bad4e1770e6f2127c022c4d60117828bed",
+            "version": "v1.6.25",
+            "revision": "b2852089fcfd0794d25d57f193e15121ab8a6d9e",
             "packages": [
                 "aws",
                 "aws/credentials",
                 "aws/session",
                 "aws/signer/v4",
-                "private/protocol/rest",
                 "service/elasticsearchservice"
             ]
         },
@@ -26,14 +25,6 @@
             "name": "github.com/jmespath/go-jmespath",
             "version": "0.2.2",
             "revision": "3433f3ea46d9f8019119e7dd41274e112a2359a9",
-            "packages": [
-                "."
-            ]
-        },
-        {
-            "name": "github.com/sha1sum/aws_signing_client",
-            "branch": "master",
-            "revision": "10c1eca1d9f91702baf8555601b00abeb946343c",
             "packages": [
                 "."
             ]
