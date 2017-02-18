@@ -1,5 +1,5 @@
 {
-    "memo": "c3cd118b8db6b39bbb7fef54bb9361660f89c7d4f7731e1e3f87ffb026c924f3",
+    "memo": "8b1090a8b2e288a4e0757bef6e873c27a59c1f0d335df28540bb61d60ca9e9bf",
     "projects": [
         {
             "name": "github.com/aws/aws-sdk-go",
@@ -25,6 +25,14 @@
             "name": "github.com/jmespath/go-jmespath",
             "version": "0.2.2",
             "revision": "3433f3ea46d9f8019119e7dd41274e112a2359a9",
+            "packages": [
+                "."
+            ]
+        },
+        {
+            "name": "github.com/ogier/pflag",
+            "version": "v0.0.1",
+            "revision": "32a05c62658bd1d7c7e75cbc8195de5d585fde0f",
             "packages": [
                 "."
             ]
