@@ -90,7 +90,7 @@ func main() {
 		fmt.Fprintln(os.Stdout, "Using endpoint "+endpoint)
 	}
 
-  fmt.Fprintln(os.Stdout, "Listen "+listen)
+	fmt.Fprintln(os.Stdout, "Listen "+listen)
 	http.HandleFunc("/", handler(endpoint))
-  http.ListenAndServe(listen, nil)
+	http.ListenAndServe(listen, nil)
 }

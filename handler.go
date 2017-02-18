@@ -6,17 +6,29 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"os/user"
 	"strings"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/aws/signer/v4"
 )
 
 func handler(endpoint string) func(w http.ResponseWriter, r *http.Request) {
-	u, _ := user.Current()
-	creds := credentials.NewSharedCredentials(u.HomeDir+"/.aws/credentials", os.Getenv("AWS_PROFILE"))
+	ec2m := ec2metadata.New(session.New(), &aws.Config{
+		HTTPClient: &http.Client{Timeout: 10 * time.Second},
+	})
+	creds := credentials.NewChainCredentials([]credentials.Provider{
+		&credentials.SharedCredentialsProvider{
+			Profile: os.Getenv("AWS_PROFILE"),
+		},
+		&ec2rolecreds.EC2RoleProvider{
+			Client: ec2m,
+		},
+	})
 	signer := v4.NewSigner(creds)
 	client := http.DefaultClient
 	return func(w http.ResponseWriter, r *http.Request) {
