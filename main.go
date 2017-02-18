@@ -58,11 +58,18 @@ func main() {
 		os.Exit(-1)
 	}
 
-	if profile != "" {
+	if profile == "" {
+		profile = os.Getenv("AWS_PROFILE")
+	} else {
 		os.Setenv("AWS_PROFILE", profile)
 	}
 
-	if region != "" {
+	if region == "" {
+		region = os.Getenv("AWS_REGION")
+		if region == "" {
+			region = os.Getenv("AWS_DEFAULT_REGION")
+		}
+	} else {
 		os.Setenv("AWS_REGION", region)
 	}
 
@@ -91,6 +98,7 @@ func main() {
 	}
 
 	fmt.Fprintln(os.Stdout, "Listen "+listen)
-	http.HandleFunc("/", handler(endpoint))
+
+	http.Handle("/", NewHandler(endpoint, profile, region))
 	http.ListenAndServe(listen, nil)
 }
