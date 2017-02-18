@@ -21,8 +21,8 @@ import (
 //   --profile
 // env
 //    AWS_PROFILE
-//    AWS_ACCESS_KEY_ID
-//    AWS_SECRET_ACCESS_KEY
+//    AWS_ACCESS_KEY_ID => not implement
+//    AWS_SECRET_ACCESS_KEY =>  not implement
 //    AWS_REGION
 
 var endpoint string

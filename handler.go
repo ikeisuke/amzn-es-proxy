@@ -1,36 +1,19 @@
 package main
 
 import (
-	"bytes"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
-	"time"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
-	"github.com/aws/aws-sdk-go/aws/ec2metadata"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/aws/signer/v4"
 )
 
 func handler(endpoint string) func(w http.ResponseWriter, r *http.Request) {
-	ec2m := ec2metadata.New(session.New(), &aws.Config{
-		HTTPClient: &http.Client{Timeout: 10 * time.Second},
-	})
-	creds := credentials.NewChainCredentials([]credentials.Provider{
-		&credentials.SharedCredentialsProvider{
-			Profile: os.Getenv("AWS_PROFILE"),
-		},
-		&ec2rolecreds.EC2RoleProvider{
-			Client: ec2m,
-		},
-	})
-	signer := v4.NewSigner(creds)
-	client := http.DefaultClient
+  profile := os.Getenv("AWS_PROFILE")
+  region := os.Getenv("AWS_REGION")
+  if region == "" {
+    region = os.Getenv("AWS_DEFAULT_REGION")
+  }
+	signer := NewSigner(profile, region, "es")
 	return func(w http.ResponseWriter, r *http.Request) {
 		url := r.URL
 		url.Host = endpoint
@@ -45,17 +28,12 @@ func handler(endpoint string) func(w http.ResponseWriter, r *http.Request) {
 				req.Header.Add(k, strings.Replace(v, "http://localhost:8080", "https://"+endpoint, -1))
 			}
 		}
-		var body io.ReadSeeker
-		if req.Body != nil {
-			buf, _ := ioutil.ReadAll(req.Body)
-			body = bytes.NewReader(buf)
+		err := signer.Sign(req)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
-		region := os.Getenv("AWS_REGION")
-		if region == "" {
-			region = os.Getenv("AWS_DEFAULT_REGION")
-		}
-		_, err := signer.Sign(req, body, "es", region, time.Now())
-		res, err := client.Do(req)
+		res, err := http.DefaultClient.Do(req)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
