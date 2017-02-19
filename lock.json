@@ -1,5 +1,5 @@
 {
-    "memo": "8b1090a8b2e288a4e0757bef6e873c27a59c1f0d335df28540bb61d60ca9e9bf",
+    "memo": "4c7986c128ee10f1a071ab221e07a761bafefc85c2153a04e7505583cb69924d",
     "projects": [
         {
             "name": "github.com/aws/aws-sdk-go",
@@ -8,6 +8,8 @@
             "packages": [
                 "aws",
                 "aws/credentials",
+                "aws/credentials/ec2rolecreds",
+                "aws/ec2metadata",
                 "aws/session",
                 "aws/signer/v4",
                 "service/elasticsearchservice"
