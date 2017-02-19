@@ -8,12 +8,14 @@ import (
 
 type Handler struct {
 	Endpoint string
+	Client   *http.Client
 	s        SignerInterface
 }
 
 func NewHandler(endpint string, signer SignerInterface) *Handler {
 	return &Handler{
 		Endpoint: endpint,
+		Client:   http.DefaultClient,
 		s:        signer,
 	}
 }
@@ -24,8 +26,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	url.Scheme = "https"
 	req, _ := http.NewRequest(r.Method, url.String(), r.Body)
 	req.ContentLength = r.ContentLength
-  origin := "http://" + r.Host;
-  replace := "https://" + endpoint
+	origin := "http://" + r.Host
+	replace := "https://" + h.Endpoint
 	for k, vs := range r.Header {
 		if k == "Connection" {
 			continue
@@ -39,7 +41,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	res, err := http.DefaultClient.Do(req)
+	res, err := h.Client.Do(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
