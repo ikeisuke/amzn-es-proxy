@@ -9,5 +9,9 @@ deployment:
     commands:
       - go get github.com/mitchellh/gox
       - go get github.com/tcnksm/ghr
-      - gox --osarch "linux/amd64 darwin/amd64" --output "dist/{{.Dir}}_{{.OS}}_{{.Arch}}"
+      - mkdir dist
+      - gox --osarch "linux/amd64" --output "{{.Dir}}"
+      - tar zcvf dist/amzn-es-proxy_linux_amd64.tar.gz amzn-es-proxy
+      - gox --osarch "darwin/amd64" --output "{{.Dir}}"
+      - tar zcvf dist/amzn-es-proxy_darwin_amd64.tar.gz amzn-es-proxy
       - ghr -t $GITHUB_TOKEN -u $GITHUB_USERNAME -r $CIRCLE_PROJECT_REPONAME -replace $CIRCLE_TAG dist/
